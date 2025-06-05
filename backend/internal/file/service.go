@@ -19,7 +19,7 @@ import (
 //  1) mark status="processing"
 //  2) extract text (PDF or plain text)
 //  3) chunk it (~2000 chars each)
-//  4) store each chunk in file_chunks and immediately compute + store its embedding
+//  4) store each chunk in file_chunks (with NULL embedding), then compute + store embedding
 //  5) once at least one chunk is stored, call AI to generate a bucket name
 //  6) mark file.status="completed" (or "failed" on error)
 func ProcessFile(fileID uint) {
@@ -63,13 +63,13 @@ func ProcessFile(fileID uint) {
 		return
 	}
 
-	// 5) For each chunk: insert FileChunk row, then compute embedding
+	// 5) For each chunk: insert FileChunk row (with Embedding == nil), then compute embedding
 	for idx, txt := range chunks {
 		ch := FileChunk{
 			FileID:     fileID,
 			ChunkIndex: idx,
 			Content:    txt,
-			// Embedding will be populated below
+			// Embedding is left nil here → INSERT will set embedding = NULL
 		}
 		if err := db.DB.Create(&ch).Error; err != nil {
 			log.Printf("[ProcessFile] could not create chunk row: %v\n", err)
@@ -85,17 +85,17 @@ func ProcessFile(fileID uint) {
 			continue
 		}
 
-		// 5.b) Convert []float32 → pgvector.Vector and save
+		// 5.b) Convert []float32 → pgvector.Vector, then take address
 		vec := pgvector.NewVector(embedVec)
+		// ch.Embedding = &vec // (if you want to keep ch in memory). But we can also directly do an UPDATE:
 		if err := db.DB.Model(&FileChunk{}).
 			Where("id = ?", ch.ID).
-			Update("embedding", vec).Error; err != nil {
+			Update("embedding", &vec).Error; err != nil {
 			log.Printf("[ProcessFile] could not save embedding for chunk %d: %v\n", idx, err)
 		}
 	}
 
 	// 6) Once at least one chunk is inserted, generate a bucket name
-	//    We’ll fetch the first 3 chunks’ content, concatenate them, and call AI.
 	var firstChunks []FileChunk
 	if err := db.DB.Where("file_id = ?", fileID).
 		Order("chunk_index ASC").
@@ -112,7 +112,6 @@ func ProcessFile(fileID uint) {
 		if err != nil {
 			log.Printf("[ProcessFile] GenerateBucketName error: %v\n", err)
 		} else {
-			// Update bucket name
 			if err := db.DB.Model(&bucket.Bucket{}).
 				Where("id = ?", frec.BucketID).
 				Update("name", newName).Error; err != nil {

@@ -19,13 +19,17 @@ type File struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
-// FileChunk represents a single text chunk of a File.
+// FileChunk represents one chunk of text plus its embedding.
 type FileChunk struct {
 	ID          uint             `gorm:"primaryKey"`
 	FileID      uint             `gorm:"index;not null"`
 	ChunkIndex  int              `gorm:"not null"`
 	Content     string           `gorm:"type:text;not null"`
-	Embedding   pgvector.Vector  `gorm:"type:vector(1536)"` // now using pgvector.Vector
+
+	// Make Embedding a *pgvector.Vector so that a nil pointer
+	// becomes SQL NULL on INSERT.  We’ll fill it later.
+	Embedding   *pgvector.Vector `gorm:"type:vector(1536)"`
+
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt   `gorm:"index"`
