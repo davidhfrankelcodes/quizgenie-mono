@@ -10,6 +10,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/auth"
+    "github.com/davidhfrankelcodes/quizgenie-backend/internal/bucket"
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/db"
 )
 
@@ -35,6 +36,9 @@ func main() {
 	// Public routes:
 	mux.HandleFunc("/signup", auth.SignupHandler)
 	mux.HandleFunc("/login", auth.LoginHandler)
+	mux.Handle("/buckets", auth.AuthMiddleware(http.HandlerFunc(bucket.CreateBucketHandler)))
+	mux.Handle("/buckets/", auth.AuthMiddleware(http.HandlerFunc(bucket.ListBucketsHandler)))
+
 
 	// Protected example route:
 	mux.Handle("/ping", auth.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
