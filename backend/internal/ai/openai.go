@@ -25,7 +25,7 @@ func GetEmbedding(text string) ([]float32, error) {
 		return nil, fmt.Errorf("OpenAI client not initialized")
 	}
 	ctx := context.Background()
-	req := goopenai.EmbeddingsRequest{
+	req := goopenai.EmbeddingRequest{
 		Model: goopenai.AdaEmbeddingV2,
 		Input: []string{text},
 	}
