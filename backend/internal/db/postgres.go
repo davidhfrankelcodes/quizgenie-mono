@@ -22,7 +22,7 @@ func InitDB() {
   name := os.Getenv("DB_NAME")
 
   dsn := fmt.Sprintf(
-    "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+    "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable connect_timeout=30",
     host, user, pass, name, port,
   )
 
