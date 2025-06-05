@@ -1,8 +1,8 @@
 // backend/cmd/api/main.go
-
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,33 +14,43 @@ import (
 )
 
 func main() {
-	// Load .env (if it exists) so that os.Getenv can read DB_HOST, DB_USER, etc.
+	// Load .env first, so that os.Getenv can pick up JWT_SECRET
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, proceeding with environment variables")
 	}
 
+	// Now initialize the JWT module (this will fatal if JWT_SECRET is missing)
+	auth.InitJWT()
+
 	// Initialize GORM + Postgres
 	db.InitDB()
 
-	// Auto‐migrate the User model
+	// Auto-migrate only the User model for now
 	if err := db.DB.AutoMigrate(&auth.User{}); err != nil {
 		log.Fatal("AutoMigrate User failed:", err)
 	}
 
-	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message":"pong"}`))
-	})
+	mux := http.NewServeMux()
 
-	// Read port from environment (loaded from .env or actual env), default to 8080
+	// Public routes:
+	mux.HandleFunc("/signup", auth.SignupHandler)
+	mux.HandleFunc("/login", auth.LoginHandler)
+
+	// Protected example route:
+	mux.Handle("/ping", auth.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"message": "pong"})
+	})))
+
+	// Read port from environment, default to 8080
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-
 	addr := fmt.Sprintf(":%s", port)
 	fmt.Println("Starting API server on", addr)
-	if err := http.ListenAndServe(addr, nil); err != nil {
+
+	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
