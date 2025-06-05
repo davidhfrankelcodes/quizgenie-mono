@@ -101,7 +101,7 @@ while true; do
     echo "   → quiz is ready!"
     break
   fi
-  if (( attempts >= 10 )); then
+  if (( attempts >= 100 )); then
     echo "   → timed out waiting for quiz to become 'ready'. Continuing anyway."
     break
   fi

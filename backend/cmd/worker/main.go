@@ -46,7 +46,9 @@ func main() {
 	// ─── ProcessFile ────────────────────────────────────────────────────────────
 	mux.HandleFunc("ProcessFile", func(ctx context.Context, t *asynq.Task) error {
 		// payload is JSON: {"file_id":123}
-		var payload struct{ FileID uint }
+		var payload struct {
+			FileID uint `json:"file_id"`
+		}
 		if err := json.Unmarshal(t.Payload(), &payload); err != nil {
 			return err
 		}
@@ -76,8 +78,11 @@ func main() {
 
 	// ─── GenerateQuiz ───────────────────────────────────────────────────────────
 	mux.HandleFunc("GenerateQuiz", func(ctx context.Context, t *asynq.Task) error {
-		// payload is JSON: {"quiz_id":123}
-		var payload struct{ QuizID uint }
+		// **CRITICAL:** payload is JSON: {"quiz_id":123}
+		//      so we need the `json:"quiz_id"` tag here.
+		var payload struct {
+			QuizID uint `json:"quiz_id"`
+		}
 		if err := json.Unmarshal(t.Payload(), &payload); err != nil {
 			return err
 		}

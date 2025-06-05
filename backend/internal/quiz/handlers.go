@@ -10,19 +10,25 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hibiken/asynq"
+
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/auth"
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/bucket"
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/db"
-	"github.com/hibiken/asynq"
 )
 
 var queueClient *asynq.Client
 
-func init() {
-	redisAddr := os.Getenv("REDIS_ADDR")
-	if redisAddr != "" {
-		queueClient = asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
+// ensureQueueClient initializes the Asynq client once, but only after .env is loaded.
+func ensureQueueClient() {
+	if queueClient != nil {
+		return
 	}
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		return
+	}
+	queueClient = asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
 }
 
 type createQuizRequest struct {
@@ -78,11 +84,12 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 6) Enqueue GenerateQuizTask
+	// 6) Enqueue GenerateQuizTask (but first make sure queueClient is built)
+	ensureQueueClient()
 	payload, _ := json.Marshal(map[string]interface{}{"quiz_id": q.ID})
 	task := asynq.NewTask("GenerateQuiz", payload)
 	if queueClient == nil {
-		log.Printf("❌ [CreateQuizHandler] queueClient is nil – no tasks can be sent\n")
+		log.Printf("❌ [CreateQuizHandler] queueClient is still nil – no tasks can be sent\n")
 	} else {
 		info, err := queueClient.Enqueue(task)
 		if err != nil {
@@ -150,10 +157,10 @@ func GetQuizQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 		Explanation *string `json:"explanation,omitempty"`
 	}
 	type questionResp struct {
-		ID          uint          `json:"questionId"`
-		Text        string        `json:"text"`
-		Explanation *string       `json:"explanation,omitempty"`
-		Answers     []answerResp  `json:"answers"`
+		ID          uint         `json:"questionId"`
+		Text        string       `json:"text"`
+		Explanation *string      `json:"explanation,omitempty"`
+		Answers     []answerResp `json:"answers"`
 	}
 
 	var out []questionResp
@@ -294,7 +301,7 @@ func ListAttemptsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Join quizzes→attempts to filter for this bucket
+	// Join quizzes → attempts to filter for this bucket
 	type row struct {
 		AttemptID uint      `json:"attemptId"`
 		QuizID    uint      `json:"quizId"`
@@ -338,12 +345,12 @@ func GetAttemptDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type detailRow struct {
-		QuestionText       string  `json:"questionText"`
-		SelectedAnswerID   uint    `json:"selectedAnswerId"`
-		SelectedAnswerText string  `json:"selectedAnswerText"`
-		IsCorrect          bool    `json:"isCorrect"`
-		CorrectAnswerText  string  `json:"correctAnswerText"`
-		Explanation        string  `json:"explanation"`
+		QuestionText       string `json:"questionText"`
+		SelectedAnswerID   uint   `json:"selectedAnswerId"`
+		SelectedAnswerText string `json:"selectedAnswerText"`
+		IsCorrect          bool   `json:"isCorrect"`
+		CorrectAnswerText  string `json:"correctAnswerText"`
+		Explanation        string `json:"explanation"`
 	}
 	var details []detailRow
 	db.DB.Raw(`
