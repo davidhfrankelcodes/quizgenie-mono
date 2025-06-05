@@ -1,2 +1,6 @@
 dummy.txt
 notes.txt
+smoke.txt
+*.log
+*.pdf
+
