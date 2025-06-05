@@ -20,12 +20,17 @@ import (
 
 var queueClient *asynq.Client
 
-// initQueue initializes a global Asynq client (called once at package init).
-func init() {
-	redisAddr := os.Getenv("REDIS_ADDR")
-	if redisAddr != "" {
-		queueClient = asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
+// ensureQueueClient initializes a global Asynq client if it hasn’t been set yet.
+// Must be called after godotenv.Load(), so that REDIS_ADDR is available.
+func ensureQueueClient() {
+	if queueClient != nil {
+		return
 	}
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		return
+	}
+	queueClient = asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
 }
 
 type uploadFileResponse struct {
@@ -114,19 +119,23 @@ func UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 7) Enqueue background job to process this file (if Asynq client is available)
+	// 7) Enqueue background job to process this file.
+	//    First make sure queueClient is built (after .env is loaded).
+	ensureQueueClient()
 	if queueClient != nil {
-		// JSON-marshal the payload into []byte
 		payload, err := json.Marshal(map[string]interface{}{"file_id": f.ID})
 		if err != nil {
 			log.Printf("failed to marshal ProcessFile payload: %v", err)
 		} else {
 			task := asynq.NewTask("ProcessFile", payload)
 			if _, err := queueClient.Enqueue(task); err != nil {
-				// Log enqueue failure but do not block the request
 				log.Printf("failed to enqueue ProcessFile task: %v", err)
+			} else {
+				log.Printf("Enqueued ProcessFile for file_id=%d", f.ID)
 			}
 		}
+	} else {
+		log.Printf("⚠️  Redis not configured (REDIS_ADDR empty); skipping ProcessFile enqueue")
 	}
 
 	w.Header().Set("Content-Type", "application/json")
