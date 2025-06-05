@@ -1,3 +1,4 @@
 cmd/api/quizgenie_api
 cmd/api/quizgenie_api.exe 
 .env
+*.log

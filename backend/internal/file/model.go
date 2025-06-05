@@ -1,9 +1,9 @@
-// internal/file/model.go
 package file
 
 import (
 	"time"
 
+	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
 )
 
@@ -18,14 +18,15 @@ type File struct {
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
-// internal/file/model.go (append below File)
-type FileChunk struct {
-  ID          uint           `gorm:"primaryKey"`
-  FileID      uint           `gorm:"index;not null"`
-  ChunkIndex  int            `gorm:"not null"`
-  Content     string         `gorm:"type:text;not null"`
-  Embedding   []float32      `gorm:"type:vector(1536)"` // using pgvector
-  CreatedAt   time.Time
-  UpdatedAt   time.Time
-}
 
+// FileChunk represents a single text chunk of a File.
+type FileChunk struct {
+	ID          uint             `gorm:"primaryKey"`
+	FileID      uint             `gorm:"index;not null"`
+	ChunkIndex  int              `gorm:"not null"`
+	Content     string           `gorm:"type:text;not null"`
+	Embedding   pgvector.Vector  `gorm:"type:vector(1536)"` // now using pgvector.Vector
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt   `gorm:"index"`
+}

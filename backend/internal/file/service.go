@@ -1,4 +1,3 @@
-// internal/file/service.go
 package file
 
 import (
@@ -7,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pgvector/pgvector-go"
 
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/ai"
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/bucket"
@@ -84,10 +85,11 @@ func ProcessFile(fileID uint) {
 			continue
 		}
 
-		// 5.b) Update chunk with embedding
+		// 5.b) Convert []float32 → pgvector.Vector and save
+		vec := pgvector.NewVector(embedVec)
 		if err := db.DB.Model(&FileChunk{}).
 			Where("id = ?", ch.ID).
-			Update("embedding", embedVec).Error; err != nil {
+			Update("embedding", vec).Error; err != nil {
 			log.Printf("[ProcessFile] could not save embedding for chunk %d: %v\n", idx, err)
 		}
 	}
