@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sashabaranov/go-openai"
+	// Make sure you have run:
+	//     go get github.com/sashabaranov/go-openai
+	goopenai "github.com/sashabaranov/go-openai"
 )
 
 var OpenAIClient *goopenai.Client
@@ -37,7 +39,8 @@ func GetEmbedding(text string) ([]float32, error) {
 	return resp.Data[0].Embedding, nil
 }
 
-// GenerateBucketName takes up to the first few chunks (concatenated) and returns a short, descriptive bucket name.
+// GenerateBucketName takes up to the first few chunks (concatenated)
+// and returns a short, descriptive bucket name.
 func GenerateBucketName(chunks string) (string, error) {
 	if OpenAIClient == nil {
 		return "", fmt.Errorf("OpenAI client not initialized")
@@ -60,12 +63,11 @@ func GenerateBucketName(chunks string) (string, error) {
 	if len(resp.Choices) == 0 {
 		return "", fmt.Errorf("no choice returned from GenerateBucketName")
 	}
-	// Trim whitespace and newlines
 	return strings.TrimSpace(resp.Choices[0].Message.Content), nil
 }
 
-// GenerateQuestions takes a long context string, desired question count and choice count, and returns a JSON string
-// that the caller should parse into question objects. (Implementation omitted here—caller must parse JSON.)
+// GenerateQuestions takes a long context string, desired question count and choice count,
+// and returns a JSON string that the caller should parse into question objects.
 func GenerateQuestions(contextText string, questionCount int, choiceCount int, difficulty string) (string, error) {
 	if OpenAIClient == nil {
 		return "", fmt.Errorf("OpenAI client not initialized")

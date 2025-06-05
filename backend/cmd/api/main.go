@@ -141,9 +141,9 @@ func handleBucketsRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleQuizzesRoot dispatches:
-//   - GET  /quizzes/{quizId}                → GetQuizStatusHandler
-//   - GET  /quizzes/{quizId}/questions      → GetQuizQuestionsHandler
-//   - POST /quizzes/{quizId}/attempts       → SubmitQuizHandler
+//   - GET  /quizzes/{quizId}           → GetQuizStatusHandler
+//   - GET  /quizzes/{quizId}/questions → GetQuizQuestionsHandler
+//   - POST /quizzes/{quizId}/attempts  → SubmitQuizHandler
 func handleQuizzesRoot(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	method := r.Method
