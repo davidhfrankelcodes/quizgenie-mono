@@ -6,12 +6,15 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"time"
 
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/db"
 	"github.com/davidhfrankelcodes/quizgenie-backend/internal/file"
+	"github.com/davidhfrankelcodes/quizgenie-backend/internal/quiz"
 )
 
 func main() {
@@ -37,8 +40,10 @@ func main() {
 		},
 	)
 
-	// 5) Build a ServeMux and register the ProcessFile handler
+	// 5) Build a ServeMux and register handlers
 	mux := asynq.NewServeMux()
+
+	// ─── ProcessFile ────────────────────────────────────────────────────────────
 	mux.HandleFunc("ProcessFile", func(ctx context.Context, t *asynq.Task) error {
 		// payload is JSON: {"file_id":123}
 		var payload struct{ FileID uint }
@@ -55,8 +60,8 @@ func main() {
 			// even if this fails, we’ll try to mark completed below
 		}
 
-		// 5.b) (stub) sleep or do nothing
-		//    Later: call your real file.ProcessFileService here.
+		// 5.b) (stub) simulate some work
+		time.Sleep(500 * time.Millisecond)
 
 		// 5.c) Finally, mark status = "completed"
 		if err := db.DB.Model(&file.File{}).
@@ -66,6 +71,72 @@ func main() {
 			return err
 		}
 		log.Printf("Worker: finished ProcessFile for file_id=%d\n", payload.FileID)
+		return nil
+	})
+
+	// ─── GenerateQuiz ───────────────────────────────────────────────────────────
+	mux.HandleFunc("GenerateQuiz", func(ctx context.Context, t *asynq.Task) error {
+		// payload is JSON: {"quiz_id":123}
+		var payload struct{ QuizID uint }
+		if err := json.Unmarshal(t.Payload(), &payload); err != nil {
+			return err
+		}
+		quizID := payload.QuizID
+		log.Printf("Worker: starting GenerateQuiz for quiz_id=%d\n", quizID)
+
+		// 1) Mark quiz.status = "generating"
+		if err := db.DB.Model(&quiz.Quiz{}).
+			Where("id = ?", quizID).
+			Update("status", "generating").Error; err != nil {
+			log.Printf("Worker: failed to set generating status: %v\n", err)
+			// continue anyway so we don’t get stuck
+		}
+
+		// 2) Simulate “quiz generation” work
+		time.Sleep(1 * time.Second)
+
+		// 3) Insert a dummy question + two dummy answers
+		err := db.DB.Transaction(func(tx *gorm.DB) error {
+			// a) Create one question
+			q := quiz.Question{
+				QuizID:      quizID,
+				Text:        "What is 2 + 2?",
+				Explanation: "Basic arithmetic: 2 + 2 = 4.",
+			}
+			if err := tx.Create(&q).Error; err != nil {
+				return err
+			}
+
+			// b) Create two answers
+			answers := []quiz.Answer{
+				{QuestionID: q.ID, Text: "3", IsCorrect: false, Explanation: "No, 2 + 2 is not 3."},
+				{QuestionID: q.ID, Text: "4", IsCorrect: true, Explanation: "Yes, 2 + 2 = 4."},
+			}
+			for _, a := range answers {
+				if err := tx.Create(&a).Error; err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			log.Printf("Worker: failed to insert dummy question/answers: %v\n", err)
+			// mark quiz as "failed"
+			_ = db.DB.Model(&quiz.Quiz{}).
+				Where("id = ?", quizID).
+				Update("status", "failed").Error
+			return err
+		}
+
+		// 4) Finally, mark quiz.status = "ready"
+		if err := db.DB.Model(&quiz.Quiz{}).
+			Where("id = ?", quizID).
+			Update("status", "ready").Error; err != nil {
+			log.Printf("Worker: failed to set ready status: %v\n", err)
+			return err
+		}
+
+		log.Printf("Worker: finished GenerateQuiz for quiz_id=%d\n", quizID)
 		return nil
 	})
 

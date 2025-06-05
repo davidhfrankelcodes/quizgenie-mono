@@ -81,9 +81,14 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	// 6) Enqueue GenerateQuizTask
 	payload, _ := json.Marshal(map[string]interface{}{"quiz_id": q.ID})
 	task := asynq.NewTask("GenerateQuiz", payload)
-	if queueClient != nil {
-		if _, err := queueClient.Enqueue(task); err != nil {
-			log.Printf("failed to enqueue quiz task: %v", err)
+	if queueClient == nil {
+		log.Printf("❌ [CreateQuizHandler] queueClient is nil – no tasks can be sent\n")
+	} else {
+		info, err := queueClient.Enqueue(task)
+		if err != nil {
+			log.Printf("❌ [CreateQuizHandler] failed to enqueue GenerateQuiz: %v\n", err)
+		} else {
+			log.Printf("✅ [CreateQuizHandler] enqueued GenerateQuiz (ID=%s) for quiz_id=%d\n", info.ID, q.ID)
 		}
 	}
 
