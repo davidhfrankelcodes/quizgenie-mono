@@ -40,42 +40,13 @@ func main() {
 	mux.HandleFunc("/signup", auth.SignupHandler)
 	mux.HandleFunc("/login", auth.LoginHandler)
 
-	// All /buckets/* routes require authentication
+	// All /buckets and /buckets/ routes require authentication.
+	// We register both so that Go will not redirect “/buckets” → “/buckets/” and lose headers.
+	mux.Handle("/buckets", auth.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handleBucketsRoot(w, r)
+	})))
 	mux.Handle("/buckets/", auth.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// POST   /buckets               → create a new bucket
-		// GET    /buckets               → list all buckets
-		// POST   /buckets/{id}/files    → upload a file into bucket {id}
-		// GET    /buckets/{id}/files    → (later) list files in bucket {id}
-
-		path := r.URL.Path
-		method := r.Method
-
-		// If exactly "/buckets" or "/buckets/" with POST → CreateBucketHandler
-		if (path == "/buckets" || path == "/buckets/") && method == http.MethodPost {
-			bucket.CreateBucketHandler(w, r)
-			return
-		}
-
-		// If exactly "/buckets" or "/buckets/" with GET → ListBucketsHandler
-		if (path == "/buckets" || path == "/buckets/") && method == http.MethodGet {
-			bucket.ListBucketsHandler(w, r)
-			return
-		}
-
-		// If path matches "/buckets/{id}/files" with POST → UploadFileHandler
-		if strings.HasPrefix(path, "/buckets/") && strings.HasSuffix(path, "/files") && method == http.MethodPost {
-			file.UploadFileHandler(w, r)
-			return
-		}
-
-		// (Placeholder) If path matches "/buckets/{id}/files" with GET → ListFilesHandler (not implemented yet)
-		// if strings.HasPrefix(path, "/buckets/") && strings.HasSuffix(path, "/files") && method == http.MethodGet {
-		//     file.ListFilesHandler(w, r)
-		//     return
-		// }
-
-		// If none matched, return 404
-		http.NotFound(w, r)
+		handleBucketsRoot(w, r)
 	})))
 
 	// Protected example route:
@@ -95,4 +66,39 @@ func main() {
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
+}
+
+// handleBucketsRoot dispatches to CreateBucketHandler or ListBucketsHandler when
+// path is exactly "/buckets" or "/buckets/", or to UploadFileHandler when path
+// is "/buckets/{id}/files". All under JWT middleware.
+func handleBucketsRoot(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	method := r.Method
+
+	// If exactly "/buckets" or "/buckets/" with POST → CreateBucketHandler
+	if (path == "/buckets" || path == "/buckets/") && method == http.MethodPost {
+		bucket.CreateBucketHandler(w, r)
+		return
+	}
+
+	// If exactly "/buckets" or "/buckets/" with GET → ListBucketsHandler
+	if (path == "/buckets" || path == "/buckets/") && method == http.MethodGet {
+		bucket.ListBucketsHandler(w, r)
+		return
+	}
+
+	// If path matches "/buckets/{id}/files" with POST → UploadFileHandler
+	if strings.HasPrefix(path, "/buckets/") && strings.HasSuffix(path, "/files") && method == http.MethodPost {
+		file.UploadFileHandler(w, r)
+		return
+	}
+
+	// (Placeholder) If path matches "/buckets/{id}/files" with GET → ListFilesHandler (not implemented yet)
+	// if strings.HasPrefix(path, "/buckets/") && strings.HasSuffix(path, "/files") && method == http.MethodGet {
+	//     file.ListFilesHandler(w, r)
+	//     return
+	// }
+
+	// If none matched, return 404
+	http.NotFound(w, r)
 }

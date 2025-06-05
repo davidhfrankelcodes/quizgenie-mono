@@ -1,4 +1,5 @@
 // backend/internal/auth/middleware.go
+
 package auth
 
 import (
@@ -7,12 +8,12 @@ import (
 	"strings"
 )
 
-// key type so context is not conflicted
+// contextKey is a private type for context keys in this package.
 type contextKey string
 
 const userContextKey = contextKey("userClaims")
 
-// AuthMiddleware ensures the request has a valid JWT. It sets the Claims
+// AuthMiddleware ensures the request has a valid JWT. It sets the *Claims
 // in request.Context, so downstream handlers can read it.
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,13 +30,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// Store claims in context for later handlers
+		// Store *Claims in context for later handlers
 		ctx := context.WithValue(r.Context(), userContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// FromContext retrieves the JWT claims that were stored by AuthMiddleware.
+// FromContext retrieves the JWT *Claims that were stored by AuthMiddleware.
+// Returns (claims, true) if found, or (nil, false) otherwise.
 func FromContext(ctx context.Context) (*Claims, bool) {
 	claims, ok := ctx.Value(userContextKey).(*Claims)
 	return claims, ok

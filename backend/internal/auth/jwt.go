@@ -33,7 +33,6 @@ func InitJWT() {
 }
 
 // Claims defines the structure embedded in each JWT.
-// (Not strictly required if you use MapClaims, but provided here for illustration.)
 type Claims struct {
 	UserID   uint   `json:"user_id"`
 	Username string `json:"username"`
@@ -47,43 +46,63 @@ func GenerateToken(userID uint, username string) (string, error) {
 		return "", ErrNotInitialized
 	}
 
-	// Set standard + custom claims
-	claims := jwt.MapClaims{
+	// (We no longer declare a local "claims" variable that goes unused.)
+
+	// Use MapClaims so that "sub" and "username" appear exactly as expected
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":      userID,
 		"username": username,
 		"exp":      time.Now().Add(24 * time.Hour).Unix(),
-	}
+	})
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
 }
 
-// ParseToken validates the given JWT string and extracts the user ID.
+// ParseToken validates the given JWT string and returns a *Claims struct.
 // It returns ErrInvalidToken if parsing/validation fails, or ErrNotInitialized if InitJWT was not called.
-func ParseToken(tokenString string) (uint, error) {
+func ParseToken(tokenString string) (*Claims, error) {
 	if jwtSecret == nil {
-		return 0, ErrNotInitialized
+		return nil, ErrNotInitialized
 	}
 
 	parsed, err := jwt.Parse(tokenString, func(tok *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
 	if err != nil {
-		return 0, ErrInvalidToken
+		return nil, ErrInvalidToken
 	}
 
-	if claims, ok := parsed.Claims.(jwt.MapClaims); ok && parsed.Valid {
-		// The "sub" claim is stored as float64 by default; convert to uint
-		subRaw, exists := claims["sub"]
+	if mapClaims, ok := parsed.Claims.(jwt.MapClaims); ok && parsed.Valid {
+		// Extract "sub" (user ID) from the map
+		subRaw, exists := mapClaims["sub"]
 		if !exists {
-			return 0, ErrInvalidToken
+			return nil, ErrInvalidToken
 		}
 		idFloat, ok := subRaw.(float64)
 		if !ok {
-			return 0, ErrInvalidToken
+			return nil, ErrInvalidToken
 		}
-		return uint(idFloat), nil
+		userID := uint(idFloat)
+
+		// Extract "username"
+		usernameRaw, exists := mapClaims["username"]
+		if !exists {
+			return nil, ErrInvalidToken
+		}
+		username, ok := usernameRaw.(string)
+		if !ok {
+			return nil, ErrInvalidToken
+		}
+
+		// Build and return a Claims object
+		return &Claims{
+			UserID:   userID,
+			Username: username,
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Unix(int64(mapClaims["exp"].(float64)), 0)),
+			},
+		}, nil
 	}
 
-	return 0, ErrInvalidToken
+	return nil, ErrInvalidToken
 }

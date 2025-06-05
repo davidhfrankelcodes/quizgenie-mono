@@ -136,3 +136,53 @@ func UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 		Status: f.Status,
 	})
 }
+
+func ListFilesHandler(w http.ResponseWriter, r *http.Request) {
+	claims, ok := auth.FromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "invalid URL", http.StatusBadRequest)
+		return
+	}
+	bucketID, err := strconv.ParseUint(parts[2], 10, 64)
+	if err != nil {
+		http.Error(w, "invalid bucket ID", http.StatusBadRequest)
+		return
+	}
+
+	var b bucket.Bucket
+	if err := db.DB.
+		Where("id = ? AND user_id = ?", bucketID, claims.UserID).
+		First(&b).Error; err != nil {
+		http.Error(w, "bucket not found", http.StatusNotFound)
+		return
+	}
+
+	var files []File
+	if err := db.DB.Where("bucket_id = ?", bucketID).Find(&files).Error; err != nil {
+		http.Error(w, "could not fetch files", http.StatusInternalServerError)
+		return
+	}
+
+	type fileResp struct {
+		ID       uint   `json:"id"`
+		Filename string `json:"filename"`
+		Status   string `json:"status"`
+	}
+	var out []fileResp
+	for _, f := range files {
+		out = append(out, fileResp{
+			ID:       f.ID,
+			Filename: f.Filename,
+			Status:   f.Status,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(out)
+}
