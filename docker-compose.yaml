@@ -1,33 +1,81 @@
 name: quizgenie
 services:
   postgres:
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
-    restart: ${PG_RESTART_POLICY:-always}
+    image: postgres:15
     environment:
-      POSTGRES_USER: ${DB_USER:-quizgenie}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-quizgenie}
-      POSTGRES_DB: ${DB_NAME:-quizgenie}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "${PG_HOST_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-quizgenie}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
+
   redis:
     image: redis:alpine
-    restart: ${REDIS_RESTART_POLICY:-always}
     ports:
-      - "${REDIS_HOST_PORT:-6379}:6379"
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: ./cmd/api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - REDIS_ADDR=redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - FILE_STORAGE_PATH=/data/uploads
+    volumes:
+      - ./backend/uploads:/data/uploads
+      - ./backend/.env:/app/.env
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: ./cmd/worker/Dockerfile
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - REDIS_ADDR=redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - FILE_STORAGE_PATH=/data/uploads
+    volumes:
+      - ./backend/uploads:/data/uploads
+      - ./backend/.env:/app/.env
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend/quizgenie-ui
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
 
 volumes:
   pgdata:
