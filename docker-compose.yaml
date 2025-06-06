@@ -1,23 +1,23 @@
 name: quizgenie
 services:
   postgres:
-    image: postgres:15
+    image: postgres:${POSTGRES_VERSION_TAG:-15}
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-quizgenie}
+      - POSTGRES_USER=${DB_USER:-quizgenie}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-quizgenie}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-quizgenie}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:alpine
+    image: redis:${REDIS_VERSION_TAG:-alpine}
     ports:
-      - "6379:6379"
+      - "${REDIS_HOST_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -29,16 +29,16 @@ services:
       context: ./backend
       dockerfile: ./cmd/api/Dockerfile
     ports:
-      - "8080:8080"
+      - "${API_HOST_PORT:-8080}:8080"
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER:-quizgenie}
+      - DB_PASSWORD=${DB_PASSWORD:-quizgenie}
+      - DB_NAME=${DB_NAME:-quizgenie}
       - REDIS_ADDR=redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET:?missing quizgenie-secret}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?missing openai-api-key}
       - FILE_STORAGE_PATH=/data/uploads
     volumes:
       - ./backend/uploads:/data/uploads
@@ -54,12 +54,12 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER:-quizgenie}
+      - DB_PASSWORD=${DB_PASSWORD:-quizgenie}
+      - DB_NAME=${DB_NAME:-quizgenie}
       - REDIS_ADDR=redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET:?missing quizgenie-secret}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?missing openai-api-key}
       - FILE_STORAGE_PATH=/data/uploads
     volumes:
       - ./backend/uploads:/data/uploads
