@@ -79,6 +79,12 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"message": "pong"})
 	})))
 
+   // Public healthcheck endpoint (no auth)
+   mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+       w.WriteHeader(http.StatusOK)
+       w.Write([]byte(`{"status":"ok"}`))
+   })
+
 	// Read PORT from environment, default to 8080
 	port := os.Getenv("PORT")
 	if port == "" {
