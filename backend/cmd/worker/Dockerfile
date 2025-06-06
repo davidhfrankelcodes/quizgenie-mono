@@ -31,8 +31,7 @@ WORKDIR /home/appuser
 
 # Copy the compiled worker binary
 COPY --from=builder /quizgenie_worker .
+COPY wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
+RUN chmod +x /usr/local/bin/wait-for-postgres.sh
 
-# Optionally copy a .env if you mount it via docker-compose
-# COPY --from=builder /app/.env ./
-
-ENTRYPOINT ["./quizgenie_worker"]
+ENTRYPOINT ["/usr/local/bin/wait-for-postgres.sh", "./quizgenie_worker"]

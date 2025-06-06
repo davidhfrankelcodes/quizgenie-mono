@@ -31,11 +31,10 @@ WORKDIR /home/appuser
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /quizgenie_api .
-
-# Optionally copy in a .env if you prefer (docker‐compose mounts it)
-# COPY --from=builder /app/.env ./
+COPY wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
+RUN chmod +x /usr/local/bin/wait-for-postgres.sh
 
 # Expose the port that the API listens on
 EXPOSE 8080
 
-ENTRYPOINT ["./quizgenie_api"]
+ENTRYPOINT ["/usr/local/bin/wait-for-postgres.sh", "./quizgenie_api"]

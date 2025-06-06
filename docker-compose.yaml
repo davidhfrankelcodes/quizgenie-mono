@@ -1,7 +1,9 @@
 name: quizgenie
 services:
   postgres:
-    image: postgres:${POSTGRES_VERSION_TAG:-15}
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
     environment:
       - POSTGRES_DB=${DB_NAME:-quizgenie}
       - POSTGRES_USER=${DB_USER:-quizgenie}
