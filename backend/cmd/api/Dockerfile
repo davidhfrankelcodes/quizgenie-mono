@@ -34,9 +34,5 @@ COPY cmd/api/wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
 # 3) Make both of them executable
 RUN chmod +x ./quizgenie_api /usr/local/bin/wait-for-postgres.sh
 
-# 4) Create a non-root user and switch to it
-RUN addgroup -S appuser && adduser -S -G appuser appuser
-USER appuser
-
 EXPOSE 8080
 ENTRYPOINT ["/usr/local/bin/wait-for-postgres.sh", "./quizgenie_api"]
