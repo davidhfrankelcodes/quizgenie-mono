@@ -11,14 +11,18 @@ RUN npm ci
 COPY . .
 
 # 3) Run the production build
-#    (if your Angular project’s name is not “quizgenie-ui”, adjust the --configuration and output path accordingly)
 RUN npm run build --configuration=production
+
 
 # ── Stage 2: Serve with nginx ──────────────────────────────────────────────
 FROM nginx:alpine
 
-# Copy whatever folder(s) are under /app/dist into nginx’s html root
-COPY --from=build /app/dist/* /usr/share/nginx/html
+# Remove default nginx index (optional but recommended)
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy Angular’s “dist/quizgenie-frontend” output into nginx’s html root
+COPY --from=build /app/dist/quizgenie-frontend /usr/share/nginx/html
+
 # Expose port 80
 EXPOSE 80
 
