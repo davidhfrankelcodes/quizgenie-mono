@@ -70,10 +70,10 @@ services:
 
   frontend:
     build:
-      context: ./frontend/quizgenie-ui
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "${UI_HOST_PORT:-9000}:80"
     depends_on:
       - api
 

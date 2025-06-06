@@ -1,5 +1,5 @@
 # ── Stage 1: Build the Go API binary ────────────────────────────────────────
-FROM golang:1.20-alpine AS builder
+FROM golang:1.24.4-alpine AS builder
 
 # Install git (for go modules) and any C toolchain if needed
 RUN apk add --no-cache git gcc musl-dev

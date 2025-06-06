@@ -1,29 +1,26 @@
 # ── Stage 1: Build the Angular app ─────────────────────────────────────────
-FROM node:16-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package files and install dependencies
+# 1) Copy package files and install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy the rest of the frontend code
+# 2) Copy the rest of the frontend code
 COPY . .
 
-# Build the production artifacts
-RUN npm run build --prod
+# 3) Run the production build
+#    (if your Angular project’s name is not “quizgenie-ui”, adjust the --configuration and output path accordingly)
+RUN npm run build --configuration=production
 
 # ── Stage 2: Serve with nginx ──────────────────────────────────────────────
 FROM nginx:alpine
 
-# Copy the compiled Angular output to nginx’s html folder.
-# Adjust “quizgenie-ui” below if your dist folder has a different name.
-COPY --from=build /app/dist/quizgenie-ui /usr/share/nginx/html
-
-# If you have a custom nginx.conf, copy it here. Otherwise, the default
-# will serve index.html and static assets.
-# COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-
+# Copy whatever folder(s) are under /app/dist into nginx’s html root
+COPY --from=build /app/dist/* /usr/share/nginx/html
+# Expose port 80
 EXPOSE 80
 
+# Run nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]

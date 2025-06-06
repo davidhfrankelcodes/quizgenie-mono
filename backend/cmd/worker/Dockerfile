@@ -1,5 +1,5 @@
 # ── Stage 1: Build the Go worker binary ────────────────────────────────────
-FROM golang:1.20-alpine AS builder
+FROM golang:1.24.4-alpine AS builder
 
 # Install git and C toolchain for go modules
 RUN apk add --no-cache git gcc musl-dev
