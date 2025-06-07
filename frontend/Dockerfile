@@ -3,24 +3,26 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
-# 1) Copy package files and install dependencies
+# 1) Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# 2) Copy the rest of the frontend code
+# 2) Copy source & build
 COPY . .
-
-# 3) Run the production build
-#    (if your Angular project’s name is not “quizgenie-ui”, adjust the --configuration and output path accordingly)
 RUN npm run build --configuration=production
 
 # ── Stage 2: Serve with nginx ──────────────────────────────────────────────
 FROM nginx:alpine
 
-# Copy whatever folder(s) are under /app/dist into nginx’s html root
-COPY --from=build /app/dist/* /usr/share/nginx/html
-# Expose port 80
-EXPOSE 80
+# 1) Remove default welcome page
+RUN rm -rf /usr/share/nginx/html/*
 
-# Run nginx in the foreground
+# 2) Add our nginx config
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# 3) Copy *just* the browser build output into nginx’s html root
+COPY --from=build /app/dist/quizgenie-frontend/browser/ /usr/share/nginx/html/
+
+# 4) Expose & run
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
