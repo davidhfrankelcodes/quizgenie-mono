@@ -9,6 +9,12 @@ interface LoginResponse {
   username: string;
 }
 
+interface SignupRequest {
+  username: string;
+  password: string;
+  email: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = '/api';
@@ -19,6 +25,15 @@ export class AuthService {
 
   login(username: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { username, password }).pipe(
+      tap(res => {
+        localStorage.setItem(this.tokenKey, res.token);
+        this.loggedInSubject.next(true);
+      })
+    );
+  }
+
+  signup(username: string, password: string, email: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/signup`, { username, password, email }).pipe(
       tap(res => {
         localStorage.setItem(this.tokenKey, res.token);
         this.loggedInSubject.next(true);

@@ -1,15 +1,18 @@
-// src/app/components/login/login.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RouterLink }   from '@angular/router';
+import { EnvService } from '../../services/env.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,   // for *ngIf
-    FormsModule     // for [(ngModel)]
+    CommonModule,
+    FormsModule,
+    RouterLink
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -18,19 +21,25 @@ export class LoginComponent {
   username = '';
   password = '';
   errorMessage = '';
+  allowSignup: boolean;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    env: EnvService,
+  ) {
+    this.allowSignup = env.allowSignup;
+  }
 
   login() {
-    // ← Your actual login logic (e.g. call AuthService) goes here.
-    // For now you can just navigate to “/” once the user logs in successfully:
-    if (this.username && this.password) {
-      // e.g. AuthService.login(...).subscribe(...),
-      // on success:
-      this.router.navigate(['/']);
-    } else {
+    if (!this.username || !this.password) {
       this.errorMessage = 'Username and password are required.';
+      return;
     }
+    this.auth.login(this.username, this.password).subscribe({
+      next: () => this.router.navigate(['/']),
+      error: () => this.errorMessage = 'Invalid credentials.'
+    });
   }
 
   clearError() {
