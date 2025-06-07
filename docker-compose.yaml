@@ -42,6 +42,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:?missing quizgenie-secret}
       - OPENAI_API_KEY=${OPENAI_API_KEY:?missing openai-api-key}
       - FILE_STORAGE_PATH=/data/uploads
+      - ALLOW_SIGNUP=${ALLOW_SIGNUP:-false}
     volumes:
       - ./backend/uploads:/data/uploads
       - ./backend/.env:/app/.env
@@ -89,12 +90,13 @@ services:
       - "${UI_HOST_PORT:-9000}:80"
     depends_on:
       - api
+    environment:
+      - ALLOW_SIGNUP=${ALLOW_SIGNUP:-false}
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
-
 
 volumes:
   pgdata:
