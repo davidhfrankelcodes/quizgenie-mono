@@ -13,10 +13,11 @@ import { AuthService } from '../../services/auth.service';
   styleUrls:   ['./signup.component.css']
 })
 export class SignupComponent {
-  username = '';
-  email    = '';
-  password = '';
-  error    = '';
+  username        = '';
+  email           = '';
+  password        = '';
+  confirmPassword = '';
+  error           = '';
 
   constructor(
     private auth: AuthService,
@@ -24,12 +25,21 @@ export class SignupComponent {
   ) {}
 
   signup() {
-    if (!this.username || !this.email || !this.password) {
+    // all fields required
+    if (!this.username || !this.email || !this.password || !this.confirmPassword) {
       this.error = 'All fields are required.';
       return;
     }
+
+    // passwords must match
+    if (this.password !== this.confirmPassword) {
+      this.error = 'Passwords do not match.';
+      return;
+    }
+
+    // proceed
     this.auth.signup(this.username, this.password, this.email).subscribe({
-      next: () => this.router.navigate(['']),  // ← go home
+      next: () => this.router.navigate(['']),
       error: err => this.error = err.status === 409
         ? 'Username already taken'
         : 'Signup failed'
