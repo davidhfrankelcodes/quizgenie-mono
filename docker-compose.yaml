@@ -32,19 +32,10 @@ services:
       dockerfile: ./cmd/api/Dockerfile
     ports:
       - "${API_HOST_PORT:-8080}:8080"
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=${DB_USER:-quizgenie}
-      - DB_PASSWORD=${DB_PASSWORD:-quizgenie}
-      - DB_NAME=${DB_NAME:-quizgenie}
-      - REDIS_ADDR=redis:6379
-      - JWT_SECRET=${JWT_SECRET:?missing quizgenie-secret}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:?missing openai-api-key}
-      - FILE_STORAGE_PATH=/data/uploads
     volumes:
       - ./backend/uploads:/data/uploads
-      - ./backend/.env:/app/.env
+    env_file:
+      - .env
     depends_on:
       - postgres
       - redis
@@ -58,19 +49,10 @@ services:
     build:
       context: ./backend
       dockerfile: ./cmd/worker/Dockerfile
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=${DB_USER:-quizgenie}
-      - DB_PASSWORD=${DB_PASSWORD:-quizgenie}
-      - DB_NAME=${DB_NAME:-quizgenie}
-      - REDIS_ADDR=redis:6379
-      - JWT_SECRET=${JWT_SECRET:?missing quizgenie-secret}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:?missing openai-api-key}
-      - FILE_STORAGE_PATH=/data/uploads
     volumes:
       - ./backend/uploads:/data/uploads
-      - ./backend/.env:/app/.env
+    env_file:
+      - .env
     depends_on:
       - postgres
       - redis
@@ -89,12 +71,13 @@ services:
       - "${UI_HOST_PORT:-9000}:80"
     depends_on:
       - api
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
-
 
 volumes:
   pgdata:

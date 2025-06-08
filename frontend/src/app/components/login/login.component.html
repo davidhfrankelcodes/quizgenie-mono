@@ -31,4 +31,9 @@
       {{ errorMessage }}
     </div>
   </form>
+   <!-- new sign-up link -->
+  <p *ngIf="allowSignup" class="signup-prompt">
+    Don’t have an account?
+    <a routerLink="/signup">Sign up here</a>.
+  </p>
 </div>

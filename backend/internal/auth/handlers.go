@@ -4,6 +4,7 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -29,6 +30,12 @@ type authResponse struct {
 
 // POST /signup
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
+	// disallow if feature flag is off
+	if os.Getenv("ALLOW_SIGNUP") != "true" {
+		http.NotFound(w, r)
+		return
+	}
+
 	var req signupRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request payload", http.StatusBadRequest)

@@ -1,18 +1,15 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
+import { SignupComponent } from './components/signup/signup.component';
+import { HomeComponent } from './home/home.component';
+import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  // Route for login page
-  { path: 'login', component: LoginComponent },
-
-  // (You can add additional routes here, e.g. a home/dashboard component once the user is logged in.)
-  // Example:
-  // { path: '', component: HomeComponent, canActivate: [AuthGuard] },
-
-  // Redirect “empty” to login (or wherever you want)
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-
-  // Wildcard catch-all (optional)
-  { path: '**', redirectTo: 'login' }
+  // guarded home
+  { path: '',     component: HomeComponent, canActivate: [AuthGuard] },
+  // public
+  { path: 'login',  component: LoginComponent },
+  { path: 'signup', component: SignupComponent },
+  // catch-all
+  { path: '**',    redirectTo: '' }
 ];
