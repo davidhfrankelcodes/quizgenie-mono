@@ -1,15 +1,21 @@
+// src/app/app.routes.ts
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { SignupComponent } from './components/signup/signup.component';
-import { HomeComponent } from './home/home.component';
-import { AuthGuard } from './guards/auth.guard';
+
+import { LoginComponent }   from './components/login/login.component';
+import { SignupComponent }  from './components/signup/signup.component';
+import { BucketList }       from './components/bucket-list/bucket-list';
+import { BucketDetail }     from './components/bucket-detail/bucket-detail';
+import { AuthGuard }        from './guards/auth.guard';
 
 export const routes: Routes = [
-  // guarded home
-  { path: '',     component: HomeComponent, canActivate: [AuthGuard] },
   // public
   { path: 'login',  component: LoginComponent },
   { path: 'signup', component: SignupComponent },
-  // catch-all
-  { path: '**',    redirectTo: '' }
+
+  // authenticated views
+  { path: '',                component: BucketList,   canActivate: [AuthGuard] },
+  { path: 'buckets/:id',     component: BucketDetail, canActivate: [AuthGuard] },
+
+  // fallback
+  { path: '**', redirectTo: '' }
 ];

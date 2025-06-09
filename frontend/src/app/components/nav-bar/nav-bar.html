@@ -1,0 +1,8 @@
+<!-- src/app/components/nav-bar/nav-bar.html -->
+<nav class="nav-bar">
+  <a routerLink="/">Home</a>
+  <!-- only show when user is logged in -->
+  <button *ngIf="isLoggedIn$ | async" (click)="logout()">
+    Log Out
+  </button>
+</nav>
