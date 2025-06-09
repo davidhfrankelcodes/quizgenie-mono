@@ -1,16 +1,31 @@
-<div class="app-shell">
-  <!-- only show sidebar when logged in -->
-  <aside class="sidebar" *ngIf="isLoggedIn$ | async">
-    <app-bucket-list></app-bucket-list>
-  </aside>
+<ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
+  <!-- ── LOGGED IN ── -->
+  <div class="app-shell">
+    <aside class="sidebar">
+      <app-bucket-list></app-bucket-list>
+    </aside>
 
-  <main class="main-content">
-    <!-- navbar always visible (you can also *ngIf it) -->
+    <main class="main-content">
+      <app-nav-bar></app-nav-bar>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <footer class="footer">
+    QuizGenie © {{ currentYear }}
+  </footer>
+</ng-container>
+
+<ng-template #loggedOut>
+  <!-- ── LOGGED OUT ── -->
+  <div class="logged-out-shell">
     <app-nav-bar></app-nav-bar>
-    <router-outlet></router-outlet>
-  </main>
-</div>
+    <div class="logged-out-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
 
-<footer class="footer">
-  QuizGenie © {{ currentYear }}
-</footer>
+  <footer class="footer">
+    QuizGenie © {{ currentYear }}
+  </footer>
+</ng-template>
