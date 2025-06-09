@@ -10,11 +10,12 @@ import { RouterOutlet } from '@angular/router';
   imports: [
     CommonModule,
     RouterOutlet,      // so <router-outlet> is known
-    NavBar, // so <app-nav-bar> is known
+    NavBar,            // so <app-nav-bar> is known
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
 export class AppComponent {
   title = 'quizgenie-frontend';
+  currentYear = new Date().getFullYear();    // ← add this
 }

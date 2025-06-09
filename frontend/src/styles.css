@@ -1,1 +1,245 @@
-/* You can add global styles to this file, and also import other style files */
+/* --------------------------------------
+   Global resets & layout
+-------------------------------------- */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f5f0e1;
+  color: #333;
+}
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Push router-outlet to fill space */
+main.content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+/* --------------------------------------
+   Navbar
+-------------------------------------- */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  background: #ded6c2;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 4px 0 #a69e8d;
+}
+.nav-bar a, .nav-bar button {
+  color: #333;
+  text-decoration: none;
+  margin-right: 1rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+.nav-bar button:hover,
+.nav-bar a:hover {
+  color: #000;
+}
+
+/* Retro “3D” button utility */
+.btn, button, .button {
+  display: inline-block;
+  background: #eee;
+  border: 2px solid #888;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  margin: 0.2em;
+  box-shadow: 4px 4px 0 #888;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.btn:hover, button:hover {
+  background: #e5e0d1;
+}
+.btn:active, button:active {
+  transform: translate(4px,4px);
+  box-shadow: none;
+}
+
+/* --------------------------------------
+   Footer
+-------------------------------------- */
+footer.footer {
+  text-align: center;
+  padding: 1rem;
+  background: #ded6c2;
+  box-shadow: 0 -4px 0 #a69e8d;
+  font-size: 0.9rem;
+}
+
+/* --------------------------------------
+   Login / Signup forms
+-------------------------------------- */
+.login-container {
+  max-width: 360px;
+  margin: 4rem auto;
+  padding: 2.5rem;
+  background: #fefdf8;
+  border: 2px solid #888;
+  box-shadow: 4px 4px 0 #888;
+  border-radius: 8px;
+}
+.login-container h2 {
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.login-container label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: bold;
+}
+.login-container input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #888;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-bottom: 1.2rem;
+}
+.login-container button {
+  width: 100%;
+}
+.signup-prompt {
+  text-align: center;
+  margin-top: 1rem;
+}
+.signup-prompt a {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #007bff;
+}
+
+/* --------------------------------------
+   Home / Bucket list / Detail
+-------------------------------------- */
+.home-container,
+.bucket-list-container,
+.bucket-detail-container {
+  max-width: 800px;
+  margin: 2rem auto;
+}
+.home-container h1,
+.bucket-list-container h1,
+.bucket-detail-container h1 {
+  margin-bottom: 1.5rem;
+}
+.home-container button {
+  margin-top: 1rem;
+}
+
+/* --------------------------------------
+   Dark mode vars + toggle
+-------------------------------------- */
+:root {
+  --bg: #f5f0e1;
+  --fg: #333;
+  --nav-bg: #ded6c2;
+  --nav-shadow: #a69e8d;
+  --btn-bg: #eee;
+  --btn-border: #888;
+}
+html[data-theme="dark"] {
+  --bg: #121212;
+  --fg: #eee;
+  --nav-bg: #264b5d;
+  --nav-shadow: #1b1b1b;
+  --btn-bg: #333;
+  --btn-border: #555;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+.nav-bar {
+  background: var(--nav-bg);
+  box-shadow: 0 4px 0 var(--nav-shadow);
+}
+.btn {
+  background: var(--btn-bg);
+  border-color: var(--btn-border);
+  box-shadow: 4px 4px 0 var(--btn-border);
+}
+
+/* Theme toggle button placeholder */
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+/* =========================================
+   SEP I A-ONLY OVERRIDES
+========================================= */
+
+/* 1) NavBar (remove the old #007bff) */
+.nav-bar {
+  background: #ded6c2 !important;      /* sepia light */
+  box-shadow: 0 4px 0 #a69e8d !important; /* sepia dark */
+}
+.nav-bar a,
+.nav-bar button {
+  color: #333 !important;
+}
+
+/* 2) Login & Signup buttons (replace Bootstrap’s blue) */
+.login-container button,
+.signup-container button {
+  background-color: #eee !important;   /* retro 3D light */
+  border-color:    #888 !important;    /* retro 3D border */
+  color:           #333 !important;
+}
+.login-container button:hover,
+.signup-container button:hover {
+  background-color: #e5e0d1 !important; /* retro 3D hover */
+}
+
+/* 3) Signup prompt link */
+.signup-prompt a,
+.login-container a.signup-link,
+.login-container a {
+  color: #a69e8d !important;           /* sepia accent */
+  text-decoration-color: #a69e8d !important;
+}
+
+/* 4) All other “.btn” or generic buttons */
+.btn,
+button,
+.button {
+  background: #eee !important;
+  border: 2px solid #888 !important;
+  box-shadow: 4px 4px 0 #888 !important;
+  color:    #333 !important;
+}
+.btn:hover,
+button:hover,
+.button:hover {
+  background: #e5e0d1 !important;
+}
+.btn:active,
+button:active,
+.button:active {
+  transform: translate(4px,4px) !important;
+  box-shadow: none !important;
+}
+
+/* 5) Global link reset (so nothing defaults to blue) */
+a {
+  color: var(--fg) !important;
+}
+a:hover,
+a:focus {
+  color: var(--link-hover-color, #000) !important;
+}
