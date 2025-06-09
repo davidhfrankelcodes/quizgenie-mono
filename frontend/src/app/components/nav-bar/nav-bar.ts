@@ -1,9 +1,9 @@
-// src/app/components/nav-bar/nav-bar.ts
-import { Component }    from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink }   from '@angular/router';
-import { Observable }   from 'rxjs';
-import { AuthService }  from '../../services/auth.service';
+import { RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { DrawerService } from '../../services/drawer.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -13,15 +13,16 @@ import { AuthService }  from '../../services/auth.service';
   styleUrls: ['./nav-bar.css']
 })
 export class NavBar {
-  // will hold login state
-  isLoggedIn$!: Observable<boolean>;
-
-  constructor(private auth: AuthService) {
-    // initialize after auth is available
+  isLoggedIn$: Observable<boolean>;
+  constructor(
+    private auth: AuthService,
+    public drawer: DrawerService
+  ) {
     this.isLoggedIn$ = this.auth.isLoggedIn();
   }
 
   logout() {
     this.auth.logout();
+    this.drawer.close();
   }
 }

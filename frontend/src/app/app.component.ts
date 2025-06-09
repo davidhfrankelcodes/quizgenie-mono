@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { BucketList } from './components/bucket-list/bucket-list';
 import { NavBar } from './components/nav-bar/nav-bar';
+import { BucketList } from './components/bucket-list/bucket-list';
 import { AuthService } from './services/auth.service';
+import { DrawerService } from './services/drawer.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -20,13 +21,15 @@ import { Observable } from 'rxjs';
   styleUrls: ['./app.css']
 })
 export class AppComponent {
-  title = 'quizgenie-frontend';
+  isLoggedIn$: Observable<boolean>;
+  drawerOpen$: Observable<boolean>;
   currentYear = new Date().getFullYear();
 
-  // expose login state to template
-  isLoggedIn$: Observable<boolean>;
-
-  constructor(private auth: AuthService) {
+  constructor(
+    private auth: AuthService,
+    private drawer: DrawerService
+  ) {
     this.isLoggedIn$ = this.auth.isLoggedIn();
+    this.drawerOpen$ = this.drawer.open$;
   }
 }

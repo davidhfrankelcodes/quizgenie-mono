@@ -1,59 +1,44 @@
-/* when not logged in, just stack navbar + content */
-.logged-out-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+/* DRAWER */
+.drawer {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+}
+.drawer-content {
+  width: 240px;
+  height: 100%;
+  background: var(--nav-bg);
+  box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+  overflow-y: auto;
 }
 
-.logged-out-shell app-nav-bar {
-  /* navbar stays at top */
+/* MAIN CONTENT SHIFT */
+.drawer + .main-content {
+  margin-left: 240px;
 }
 
-.logged-out-shell router-outlet,
-.logged-out-shell .router-outlet ~ * {
-  flex: 1;
+/* NAVBAR */
+.main-content {
   padding: 1.5rem;
+  transition: margin-left 0.3s ease;
 }
-/* ── logged-out shell is a column flex ── */
+
+/* LOGGED-OUT REMAINS AS BEFORE */
 .logged-out-shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
-
-/* content area fills available space */
 .logged-out-content {
   flex: 1;
   display: flex;
-  /* center its child both axes */
   justify-content: center;
   align-items: center;
-}
-
-/* override the login-container’s top margin */
-.logged-out-content .login-container {
-  margin: 0;
-}
-
-/* ── LOGGED-OUT LAYOUT ── */
-.logged-out-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.logged-out-content {
-  flex: 1;                    /* take up all space below navbar */
-  display: flex;
-  justify-content: center;    /* center horizontally */
-  align-items: center;        /* center vertically */
   padding: 1rem;
 }
-
-/* target both login & signup containers */
-.logged-out-content .login-container,
-.logged-out-content .signup-container {
-  margin: 0;                  /* drop their old auto-margins */
+.logged-out-content > * {
   width: 100%;
-  max-width: 360px;           /* match your form width */
+  max-width: 360px;
 }

@@ -22,7 +22,8 @@ This monorepo contains both the **backend** (Go REST API + worker) and **fronten
 6. [Environment Variables](#environment-variables)
 7. [Component Workflows](#component-workflows)
 8. [Database Schema](#database-schema)
-9. [Future Work](#future-work)
+9. [UI Development Roadmap](#ui-development-roadmap)
+10. [Future Work](#future-work)
 
 ---
 
@@ -70,29 +71,15 @@ backend/
 
 #### Key Components
 
-* \`\`
-
-  * `main.go`: sets up routes, middleware, DB migrations.
-  * `Dockerfile`: multi-stage build of Go binary.
-
-* \`\`
-
-  * `main.go`: registers Asynq task handlers for file & quiz jobs.
-  * `Dockerfile`: multi-stage build of worker binary.
-
-* \`\`: JWT init, signup & login handlers, middleware.
-
-* \`\`: GORM connection and `AutoMigrate`.
-
-* \`\`: `GetEmbedding`, `GenerateBucketName`, `GenerateQuestions` using OpenAI.
-
-* \`\`: create/list buckets; bucket renaming by AI.
-
-* \`\`: multipart upload handler, stores file, enqueues `ProcessFile` task.
-
-* \`\`: endpoints for quiz lifecycle; `GenerateQuiz` service enqueues & writes Q\&A.
-
-* \`\`: PDF text extraction and chunking logic.
+* `cmd/api/main.go`: sets up routes, middleware, DB migrations and multi-stage Dockerfile.
+* `cmd/worker/main.go`: registers Asynq task handlers for file & quiz jobs and its Dockerfile.
+* `internal/auth`: JWT init, signup & login handlers, middleware.
+* `internal/db`: GORM connection and `AutoMigrate()`.
+* `internal/ai`: `GetEmbedding`, `GenerateBucketName`, `GenerateQuestions` using OpenAI.
+* `internal/bucket`: create/list buckets; bucket renaming by AI.
+* `internal/file`: multipart upload handler, stores file, enqueues `ProcessFile` task.
+* `internal/quiz`: endpoints for quiz lifecycle; `GenerateQuiz` service enqueues & writes Q\&A.
+* `internal/utils`: PDF text extraction and chunking logic.
 
 ### Backend Running Locally
 
@@ -147,13 +134,13 @@ frontend/
 
 ### Key Frontend Components
 
-* \`\`: shows Home link and Logout button (conditional display).
-* `** / **`: authentication forms.
-* \`\`: protects routes when not logged in.
-* `** & **`: sidebar with buckets, file upload & status, "Take Quiz" flow.
-* **Services**:
+* `NavBar`: header with “Home”, “Buckets” toggle, and Logout button.
+* `LoginComponent` & `SignupComponent`: authentication forms.
+* `AuthGuard`: protects routes when not logged in.
+* `BucketListComponent`: renders bucket list in a drawer/panel toggled by NavBar.
+* Services:
 
-  * `AuthService`: login/signup, token storage & observable login state.
+  * `AuthService`: login/signup, token storage & login state observable.
   * `EnvService`: reads `ALLOW_SIGNUP` flag.
   * `TokenInterceptor`: attaches JWT to HTTP requests.
 
@@ -188,7 +175,7 @@ docker-compose up --build
 Ports:
 
 * API: `localhost:8080`
-* Frontend: `localhost:9000` (or `:80` inside container)
+* Frontend: `localhost:9000`
 
 ---
 
@@ -225,7 +212,7 @@ allow_signup=true
 1. **Signup / Login**: user obtains JWT, stored in `localStorage`.
 2. **Create Bucket**: upload first file via `POST /buckets`, placeholder name.
 3. **ProcessFile**: worker extracts text, chunks, embeddings, renames bucket via AI, marks file complete.
-4. **Bucket List**: sidebar polls `GET /buckets` and shows AI-generated names.
+4. **Bucket List**: drawer polls `GET /buckets` and shows AI-generated names.
 5. **File Status**: detail view polls `GET /buckets/{id}/files` every 5s.
 6. **Take Quiz**: settings → `POST /buckets/{id}/quizzes` → poll `/quizzes/{quizId}` until ready.
 7. **Quiz**: fetch questions → take quiz (timed/practice) → submit answers → view report.
@@ -233,32 +220,23 @@ allow_signup=true
 
 ---
 
-## Database Schema
-
-See `backend/internal/db` models and `AutoMigrate()` in `cmd/api/main.go`. Tables include:
-
-* `users`, `buckets`, `files`, `file_chunks`, `quizzes`, `questions`, `answers`, `attempts`, `attempt_answers`.
-
----
-
 ## UI Development Roadmap
-
-A step-by-step guide to fleshing out and styling the Angular UI components:
 
 1. **Application Shell & Navigation**
 
-   * Implement `AppComponent` layout: include `<app-nav-bar>` and `<router-outlet>` inside a flex/grid container.
-   * Define global styles in `styles.css` for a sidebar plus main content area (using CSS Grid or Flexbox).
+   * Implement a **top-level header** (`NavBar`) and remove the permanent sidebar.
+   * Add a **“Buckets” menu** in the header that toggles a drawer (or dropdown panel) containing the bucket list.
 
 2. **NavBar Component**
 
    * Inject `AuthService` and bind `isLoggedIn()` to the template using `*ngIf` to show/hide the “Logout” button.
    * Highlight the active route link (use `routerLinkActive`).
-   * Add responsive behavior (collapse to a hamburger menu on small screens).
+   * **Add a “Buckets” toggle** that opens/closes the bucket list drawer or dropdown.
+   * Ensure responsive behavior: on mobile, the drawer can cover full screen; on desktop, slides in from left.
 
 3. **Authentication Forms**
 
-   * Build `LoginComponent` and `SignupComponent` with Angular forms (template-driven or reactive).
+   * Build `LoginComponent` and `SignupComponent` with Angular template-driven forms.
    * Add live validation feedback (required, email format, password match).
    * Display errors inline and consider a global toast service for server errors.
    * Use `EnvService.allowSignup` to conditionally render the signup link.
@@ -269,17 +247,17 @@ A step-by-step guide to fleshing out and styling the Angular UI components:
    * Apply `AuthGuard` to all protected routes in `app.routes.ts`.
    * On navigation start, redirect unauthenticated users to `/login` and preserve return URL.
 
-5. **Bucket List Sidebar**
+5. **Bucket List Drawer/Dropdown**
 
-   * Create `BucketListComponent` to fetch and display buckets from `BucketService`.
-   * Render each bucket as a clickable item; highlight the selected bucket.
-   * Add a “+ New Bucket” button to open `FileUploadComponent` in a modal or slide-over.
-   * Implement lazy loading of bucket-detail routes.
+   * Render `<app-bucket-list>` inside a hidden panel toggled by the NavBar’s “Buckets” button.
+   * Ensure keyboard accessibility (focus trap, Esc to close).
+   * Support both slide‑in (desktop) and overlay/full‑screen (mobile) modes.
+   * Poll `GET /buckets` to refresh names; show loading indicator if fetching.
 
 6. **Bucket Detail & File Status**
 
    * Develop `BucketDetailComponent` showing file list with status icons (pending/processing/completed/failed).
-   * Poll `FileService.getFiles(bucketId)` every 5 seconds; unsubscribe on component destroy.
+   * Poll `GET /buckets/{id}/files` every 5 seconds; unsubscribe on component destroy.
    * Enable file deletion and re-upload: attach click handlers to delete buttons and upload-more button.
    * Display messages if no files or if all files are processing.
 
@@ -312,13 +290,13 @@ A step-by-step guide to fleshing out and styling the Angular UI components:
 11. **Quiz Report & History**
 
     * Implement `QuizReportComponent` to fetch and display attempt details, highlighting correct/incorrect answers with colors and explanations.
-    * Build `ReportHistoryComponent` (or integrate into bucket sidebar) to list past attempts with date and score. Clicking an entry opens `QuizReportComponent`.
+    * Build `ReportHistoryComponent` (or integrate into NavBar menu) to list past attempts with date and score. Clicking an entry opens `QuizReportComponent`.
 
 12. **Styling & Theming**
 
     * Choose a CSS approach (e.g. Tailwind or custom SASS).
     * Define a consistent color palette, typography, and spacing scale.
-    * Create shared UI components: `Button`, `Card`, `Modal`, and `Spinner`.
+    * Create shared UI components: `Button`, `Card`, `Drawer`, `Modal`, and `Spinner`.
     * Apply responsive breakpoints for mobile-friendly design.
 
 13. **Accessibility & Performance**
@@ -333,12 +311,22 @@ A step-by-step guide to fleshing out and styling the Angular UI components:
     * Mock service dependencies and verify UI logic (e.g. show/hide elements).
     * Add end-to-end (E2E) tests with Cypress or Protractor to cover critical workflows.
 
+---
+
+## Database Schema
+
+See `backend/internal/db` models and `AutoMigrate()` in `cmd/api/main.go`. Tables include:
+
+* `users`, `buckets`, `files`, `file_chunks`, `quizzes`, `questions`, `answers`, `attempts`, `attempt_answers`.
+
+---
+
 ## Future Work
 
 * Support DOCX/PPTX file types.
 * More advanced AI-driven quiz generation.
 * Role-based access control.
-* UI enhancements (drag\&drop, progress bars).
+* UI enhancements (drag & drop, progress bars).
 * CI/CD pipelines and integration tests.
 
 Happy quizzing! 🎉
