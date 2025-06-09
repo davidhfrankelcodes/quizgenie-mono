@@ -27,7 +27,7 @@ export class AppComponent {
 
   constructor(
     private auth: AuthService,
-    private drawer: DrawerService
+    public drawer: DrawerService    // ← make this public
   ) {
     this.isLoggedIn$ = this.auth.isLoggedIn();
     this.drawerOpen$ = this.drawer.open$;
