@@ -1,6 +1,39 @@
 /* --------------------------------------
    Global resets & layout
 -------------------------------------- */
+/* App Shell Layout */
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "sidebar main"
+    "sidebar footer";
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background: var(--nav-bg);
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.main-content {
+  grid-area: main;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Make footer span full width under both columns */
+.footer {
+  grid-area: footer;
+}
+
+/* --------------------------------------
+   General styles
+-------------------------------------- */
 html, body {
   height: 100%;
   margin: 0;

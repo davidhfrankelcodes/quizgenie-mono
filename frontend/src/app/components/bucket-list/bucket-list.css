@@ -1,0 +1,31 @@
+.bucket-list-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.bucket-list-container h3 {
+  margin-bottom: 1rem;
+}
+
+.bucket-list-container ul {
+  list-style: none;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.bucket-list-container li {
+  margin-bottom: 0.5rem;
+}
+
+.bucket-list-container a {
+  text-decoration: none;
+}
+
+.bucket-list-container a.active {
+  font-weight: bold;
+}
+
+.bucket-list-container .btn {
+  margin-top: 1rem;
+}

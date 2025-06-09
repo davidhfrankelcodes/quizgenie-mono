@@ -1,8 +1,15 @@
-<app-nav-bar></app-nav-bar>
+<div class="app-shell">
+  <!-- only show sidebar when logged in -->
+  <aside class="sidebar" *ngIf="isLoggedIn$ | async">
+    <app-bucket-list></app-bucket-list>
+  </aside>
 
-<main class="content">
-  <router-outlet></router-outlet>
-</main>
+  <main class="main-content">
+    <!-- navbar always visible (you can also *ngIf it) -->
+    <app-nav-bar></app-nav-bar>
+    <router-outlet></router-outlet>
+  </main>
+</div>
 
 <footer class="footer">
   QuizGenie © {{ currentYear }}
