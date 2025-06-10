@@ -1,6 +1,16 @@
-/* define the height of your header */
 :root {
   --nav-height: 3.5rem;
+}
+
+/* ── LOGGED-IN LAYOUT ── */
+.logged-in-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.logged-in-shell .main-content {
+  flex: 1;
+  overflow: auto;
 }
 
 /* NavBar stays on top */
@@ -13,7 +23,7 @@ nav.nav-bar {
 /* DRAWER */
 .drawer {
   position: fixed;
-  top: var(--nav-height);               /* start below the NavBar */
+  top: var(--nav-height);
   left: 0;
   width: 100%;
   height: calc(100% - var(--nav-height));
@@ -27,7 +37,6 @@ nav.nav-bar {
   box-shadow: 2px 0 6px rgba(0,0,0,0.2);
   overflow-y: auto;
 }
-
 /* shift only the main content when drawer is open */
 .drawer + .main-content {
   margin-left: 240px;
@@ -39,13 +48,13 @@ nav.nav-bar {
   transition: margin-left 0.3s ease;
 }
 
-/* LOGGED-OUT CENTERING */
+/* ── LOGGED-OUT CENTERING ── */
 .logged-out-shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
-.logged-out-content {
+.logged-out-shell .logged-out-content {
   flex: 1;
   display: flex;
   justify-content: center;
@@ -53,12 +62,12 @@ nav.nav-bar {
   padding: 1rem;
 }
 /* hide the empty router-outlet element so it doesn’t take up flex space */
-.logged-out-content > router-outlet {
+.logged-out-shell .logged-out-content > router-outlet {
   display: none;
 }
 /* only size the real hosts (login / signup) */
-.logged-out-content > app-login,
-.logged-out-content > app-signup {
+.logged-out-shell .logged-out-content > app-login,
+.logged-out-shell .logged-out-content > app-signup {
   width: 100%;
   max-width: 360px;
 }

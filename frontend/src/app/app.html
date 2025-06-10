@@ -1,31 +1,33 @@
 <ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
-  <!-- LOGGED IN -->
-  <app-nav-bar></app-nav-bar>
+  <!-- ── LOGGED IN ── -->
+  <div class="logged-in-shell">
+    <app-nav-bar></app-nav-bar>
 
-  <div class="drawer" *ngIf="drawerOpen$ | async" (click)="drawer.close()">
-    <div class="drawer-content" (click)="$event.stopPropagation()">
-      <app-bucket-list></app-bucket-list>
+    <div class="drawer" *ngIf="drawerOpen$ | async" (click)="drawer.close()">
+      <div class="drawer-content" (click)="$event.stopPropagation()">
+        <app-bucket-list></app-bucket-list>
+      </div>
     </div>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="footer">
+      QuizGenie © {{ currentYear }}
+    </footer>
   </div>
-
-  <main class="main-content">
-    <router-outlet></router-outlet>
-  </main>
-
-  <footer class="footer">
-    QuizGenie © {{ currentYear }}
-  </footer>
 </ng-container>
 
 <ng-template #loggedOut>
-  <!-- LOGGED OUT -->
+  <!-- ── LOGGED OUT ── -->
   <div class="logged-out-shell">
     <app-nav-bar></app-nav-bar>
     <div class="logged-out-content">
       <router-outlet></router-outlet>
     </div>
+    <footer class="footer">
+      QuizGenie © {{ currentYear }}
+    </footer>
   </div>
-  <footer class="footer">
-    QuizGenie © {{ currentYear }}
-  </footer>
 </ng-template>
