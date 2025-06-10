@@ -9,13 +9,7 @@
   flex-direction: column;
   min-height: 100vh;
 }
-.logged-in-shell .main-content {
-  flex: 1;
-  overflow: auto;
-}
-
-/* shift both NavBar & main when drawer is open */
-.logged-in-shell.drawer-open nav.nav-bar,
+/* only shift the main content, not the navbar */
 .logged-in-shell.drawer-open .main-content {
   margin-left: 240px;
 }
@@ -31,10 +25,10 @@ nav.nav-bar {
 .drawer-scrim {
   position: fixed;
   top: var(--nav-height);
-  bottom: var(--footer-height);
+  bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 1000;
 }
 
@@ -42,11 +36,11 @@ nav.nav-bar {
 .drawer-content {
   position: fixed;
   top: var(--nav-height);
-  bottom: var(--footer-height);
+  bottom: 0;
   left: 0;
   width: 240px;
   background: var(--nav-bg);
-  box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
   z-index: 1001;
   display: flex;
@@ -56,17 +50,18 @@ nav.nav-bar {
 /* close button inside drawer */
 .drawer-close-btn {
   align-self: flex-end;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   background: none;
   border: none;
-  cursor: pointer;
   padding: 0.5rem;
+  cursor: pointer;
 }
 
 /* ── MAIN CONTENT ── */
 .main-content {
   padding: 1.5rem;
   transition: margin-left 0.3s ease;
+  flex: 1;
 }
 
 /* ── FOOTER ── */
@@ -90,7 +85,7 @@ footer.footer {
   align-items: center;
   padding: 1rem;
 }
-/* hide empty outlet so it doesn’t take space */
+/* hide the empty router-outlet so it doesn’t take space */
 .logged-out-shell .logged-out-content > router-outlet {
   display: none;
 }
