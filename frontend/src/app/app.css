@@ -9,7 +9,6 @@
   flex-direction: column;
   min-height: 100vh;
 }
-/* only shift the main content, not the navbar */
 .logged-in-shell.drawer-open .main-content {
   margin-left: 240px;
 }
@@ -25,26 +24,28 @@ nav.nav-bar {
 .drawer-scrim {
   position: fixed;
   top: var(--nav-height);
-  bottom: 0;
+  bottom: var(--footer-height);
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0,0,0,0.4);
   z-index: 1000;
 }
 
 /* ── DRAWER PANEL ── */
 .drawer-content {
   position: fixed;
-  top: var(--nav-height);
-  bottom: 0;
+  top: 0;                      /* start all the way at the top */
+  bottom: 0;                   /* end at the very bottom */
   left: 0;
   width: 240px;
   background: var(--nav-bg);
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 0 6px rgba(0,0,0,0.2);
   overflow-y: auto;
   z-index: 1001;
   display: flex;
   flex-direction: column;
+  padding-top: var(--nav-height);    /* push content below the NavBar */
+  box-sizing: border-box;
 }
 
 /* close button inside drawer */
@@ -85,11 +86,9 @@ footer.footer {
   align-items: center;
   padding: 1rem;
 }
-/* hide the empty router-outlet so it doesn’t take space */
 .logged-out-shell .logged-out-content > router-outlet {
   display: none;
 }
-/* size the real forms */
 .logged-out-shell .logged-out-content > app-login,
 .logged-out-shell .logged-out-content > app-signup {
   width: 100%;

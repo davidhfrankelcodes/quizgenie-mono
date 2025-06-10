@@ -3,27 +3,29 @@
     <!-- NavBar -->
     <app-nav-bar></app-nav-bar>
 
-    <!-- Scrim: covers everything under the navbar & footer -->
+    <!-- Scrim -->
     <div
       class="drawer-scrim"
       *ngIf="drawerOpen$ | async"
       (click)="drawer.close()"
     ></div>
 
-    <!-- Sliding Drawer Panel -->
+    <!-- Drawer slides full height but content sits below header -->
     <aside class="drawer-content" *ngIf="drawerOpen$ | async">
-      <button class="drawer-close-btn" aria-label="Close buckets" (click)="drawer.close()">
-        ×
-      </button>
+      <button
+        class="drawer-close-btn"
+        aria-label="Close buckets"
+        (click)="drawer.close()"
+      >×</button>
       <app-bucket-list></app-bucket-list>
     </aside>
 
-    <!-- Main router content -->
+    <!-- Main content -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
 
-    <!-- Footer (always at bottom) -->
+    <!-- Footer -->
     <footer class="footer">
       QuizGenie © {{ currentYear }}
     </footer>
