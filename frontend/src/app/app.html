@@ -1,19 +1,27 @@
 <ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
-  <!-- ── LOGGED IN ── -->
-  <div class="logged-in-shell">
+  <div class="logged-in-shell" [class.drawer-open]="drawerOpen$ | async">
+    <!-- NavBar -->
     <app-nav-bar></app-nav-bar>
 
-    <!-- DRAWER PANEL (only the panel, no scrim) -->
+    <!-- Scrim (click anywhere to close) -->
+    <div
+      class="drawer-scrim"
+      *ngIf="drawerOpen$ | async"
+      (click)="drawer.close()"
+    ></div>
+
+    <!-- Sliding Drawer Panel -->
     <aside class="drawer-content" *ngIf="drawerOpen$ | async">
+      <button class="drawer-close-btn" (click)="drawer.close()">×</button>
       <app-bucket-list></app-bucket-list>
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- Main router content -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
 
-    <!-- FOOTER -->
+    <!-- Footer -->
     <footer class="footer">
       QuizGenie © {{ currentYear }}
     </footer>
@@ -21,7 +29,6 @@
 </ng-container>
 
 <ng-template #loggedOut>
-  <!-- ── LOGGED OUT ── -->
   <div class="logged-out-shell">
     <app-nav-bar></app-nav-bar>
     <div class="logged-out-content">
