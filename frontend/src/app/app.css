@@ -1,5 +1,6 @@
 :root {
   --nav-height: 3.5rem;
+  --footer-height: 3.5rem;
 }
 
 /* ── LOGGED-IN LAYOUT ── */
@@ -13,42 +14,50 @@
   overflow: auto;
 }
 
-/* NavBar stays on top */
+/* NavBar (remains on top) */
 nav.nav-bar {
   position: relative;
   z-index: 1100;
   height: var(--nav-height);
 }
 
-/* DRAWER */
-.drawer {
+/* ── DRAWER PANEL ── */
+.drawer-content {
   position: fixed;
   top: var(--nav-height);
+  bottom: var(--footer-height);
   left: 0;
-  width: 100%;
-  height: calc(100% - var(--nav-height));
-  background: rgba(0,0,0,0.4);
-  z-index: 1000;
-}
-.drawer-content {
   width: 240px;
-  height: 100%;
   background: var(--nav-bg);
   box-shadow: 2px 0 6px rgba(0,0,0,0.2);
   overflow-y: auto;
+  z-index: 1000;
 }
+.drawer-content > app-bucket-list {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
 /* shift only the main content when drawer is open */
-.drawer + .main-content {
+.drawer-content + .main-content {
   margin-left: 240px;
 }
 
-/* MAIN CONTENT */
+/* ── MAIN CONTENT ── */
 .main-content {
   padding: 1.5rem;
   transition: margin-left 0.3s ease;
 }
 
-/* ── LOGGED-OUT CENTERING ── */
+/* ── FOOTER ── */
+footer.footer {
+  height: var(--footer-height);
+  line-height: var(--footer-height);
+  text-align: center;
+}
+
+/* ── LOGGED-OUT LAYOUT ── */
 .logged-out-shell {
   display: flex;
   flex-direction: column;
@@ -61,11 +70,11 @@ nav.nav-bar {
   align-items: center;
   padding: 1rem;
 }
-/* hide the empty router-outlet element so it doesn’t take up flex space */
+/* hide the empty router-outlet so it doesn’t take flex-space */
 .logged-out-shell .logged-out-content > router-outlet {
   display: none;
 }
-/* only size the real hosts (login / signup) */
+/* size the real forms */
 .logged-out-shell .logged-out-content > app-login,
 .logged-out-shell .logged-out-content > app-signup {
   width: 100%;

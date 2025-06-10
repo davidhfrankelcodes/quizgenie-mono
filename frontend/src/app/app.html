@@ -3,16 +3,17 @@
   <div class="logged-in-shell">
     <app-nav-bar></app-nav-bar>
 
-    <div class="drawer" *ngIf="drawerOpen$ | async" (click)="drawer.close()">
-      <div class="drawer-content" (click)="$event.stopPropagation()">
-        <app-bucket-list></app-bucket-list>
-      </div>
-    </div>
+    <!-- DRAWER PANEL (only the panel, no scrim) -->
+    <aside class="drawer-content" *ngIf="drawerOpen$ | async">
+      <app-bucket-list></app-bucket-list>
+    </aside>
 
+    <!-- MAIN CONTENT -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
 
+    <!-- FOOTER -->
     <footer class="footer">
       QuizGenie © {{ currentYear }}
     </footer>
