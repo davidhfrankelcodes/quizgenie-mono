@@ -1,8 +1,22 @@
+/* define the height of your header */
+:root {
+  --nav-height: 3.5rem;
+}
+
+/* NavBar stays on top */
+nav.nav-bar {
+  position: relative;
+  z-index: 1100;
+  height: var(--nav-height);
+}
+
 /* DRAWER */
 .drawer {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: var(--nav-height);               /* start below the NavBar */
+  left: 0;
+  width: 100%;
+  height: calc(100% - var(--nav-height));
   background: rgba(0,0,0,0.4);
   z-index: 1000;
 }
@@ -14,18 +28,18 @@
   overflow-y: auto;
 }
 
-/* MAIN CONTENT SHIFT */
+/* shift only the main content when drawer is open */
 .drawer + .main-content {
   margin-left: 240px;
 }
 
-/* NAVBAR */
+/* MAIN CONTENT */
 .main-content {
   padding: 1.5rem;
   transition: margin-left 0.3s ease;
 }
 
-/* LOGGED-OUT REMAINS AS BEFORE */
+/* LOGGED-OUT CENTERING */
 .logged-out-shell {
   display: flex;
   flex-direction: column;
@@ -38,7 +52,13 @@
   align-items: center;
   padding: 1rem;
 }
-.logged-out-content > * {
+/* hide the empty router-outlet element so it doesn’t take up flex space */
+.logged-out-content > router-outlet {
+  display: none;
+}
+/* only size the real hosts (login / signup) */
+.logged-out-content > app-login,
+.logged-out-content > app-signup {
   width: 100%;
   max-width: 360px;
 }
