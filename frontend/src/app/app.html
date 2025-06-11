@@ -1,16 +1,13 @@
 <ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
   <div class="logged-in-shell" [class.drawer-open]="drawerOpen$ | async">
-    <!-- NavBar -->
     <app-nav-bar></app-nav-bar>
 
-    <!-- Scrim -->
     <div
       class="drawer-scrim"
       *ngIf="drawerOpen$ | async"
       (click)="drawer.close()"
     ></div>
 
-    <!-- Drawer slides full height but content sits below header -->
     <aside class="drawer-content" *ngIf="drawerOpen$ | async">
       <button
         class="drawer-close-btn"
@@ -20,12 +17,10 @@
       <app-bucket-list></app-bucket-list>
     </aside>
 
-    <!-- Main content -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
       QuizGenie © {{ currentYear }}
     </footer>

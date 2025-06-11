@@ -5,7 +5,7 @@
             (click)="drawer.toggle()">
       Buckets
     </button>
-    <a routerLink="/">Home</a>
+    <!-- Home link removed -->
   </div>
   <div class="nav-right">
     <button *ngIf="isLoggedIn$ | async" (click)="logout()">Log Out</button>
