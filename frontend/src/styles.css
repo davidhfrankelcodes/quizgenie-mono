@@ -1,6 +1,39 @@
 /* --------------------------------------
    Global resets & layout
 -------------------------------------- */
+/* App Shell Layout */
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "sidebar main"
+    "sidebar footer";
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background: var(--nav-bg);
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.main-content {
+  grid-area: main;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Make footer span full width under both columns */
+.footer {
+  grid-area: footer;
+}
+
+/* --------------------------------------
+   General styles
+-------------------------------------- */
 html, body {
   height: 100%;
   margin: 0;
@@ -73,49 +106,6 @@ footer.footer {
   background: #ded6c2;
   box-shadow: 0 -4px 0 #a69e8d;
   font-size: 0.9rem;
-}
-
-/* --------------------------------------
-   Login / Signup forms
--------------------------------------- */
-.login-container {
-  max-width: 360px;
-  margin: 4rem auto;
-  padding: 2.5rem;
-  background: #fefdf8;
-  border: 2px solid #888;
-  box-shadow: 4px 4px 0 #888;
-  border-radius: 8px;
-}
-.login-container h2 {
-  font-family: 'Courier New', monospace;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-.login-container label {
-  display: block;
-  margin-bottom: 0.4rem;
-  font-weight: bold;
-}
-.login-container input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 2px solid #888;
-  border-radius: 4px;
-  box-sizing: border-box;
-  margin-bottom: 1.2rem;
-}
-.login-container button {
-  width: 100%;
-}
-.signup-prompt {
-  text-align: center;
-  margin-top: 1rem;
-}
-.signup-prompt a {
-  font-weight: bold;
-  text-decoration: underline;
-  color: #007bff;
 }
 
 /* --------------------------------------

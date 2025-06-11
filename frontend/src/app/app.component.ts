@@ -1,21 +1,39 @@
-// src/app/app.component.ts
+// frontend/src/app/app.component.ts
+
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NavBar }       from './components/nav-bar/nav-bar';
-import { RouterOutlet } from '@angular/router';
+import { CommonModule, NgIf } from '@angular/common';
+import { RouterOutlet }       from '@angular/router';
+
+import { NavBar }    from './components/nav-bar/nav-bar';
+import { BucketList }from './components/bucket-list/bucket-list';
+
+import { AuthService }  from './services/auth.service';
+import { DrawerService }from './services/drawer.service';
+import { Observable }   from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
     CommonModule,
-    RouterOutlet,      // so <router-outlet> is known
-    NavBar,            // so <app-nav-bar> is known
+    NgIf,
+    RouterOutlet,
+    NavBar,
+    BucketList,    // drawer
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
 export class AppComponent {
-  title = 'quizgenie-frontend';
-  currentYear = new Date().getFullYear();    // ← add this
+  isLoggedIn$: Observable<boolean>;
+  drawerOpen$: Observable<boolean>;
+  currentYear = new Date().getFullYear();
+
+  constructor(
+    private auth:   AuthService,
+    public  drawer: DrawerService
+  ) {
+    this.isLoggedIn$ = this.auth.isLoggedIn();
+    this.drawerOpen$ = this.drawer.open$;
+  }
 }

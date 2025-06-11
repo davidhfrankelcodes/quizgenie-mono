@@ -1,1 +1,12 @@
-<p>bucket-list works!</p>
+<div class="bucket-list-container">
+  <h3>Your Buckets</h3>
+  <ul>
+    <li *ngFor="let b of buckets">
+      <a
+        [routerLink]="['/buckets', b.id]"
+        routerLinkActive="active"
+      >{{ b.name }}</a>
+    </li>
+  </ul>
+  <button class="btn" (click)="createBucket()">+ New Bucket</button>
+</div>

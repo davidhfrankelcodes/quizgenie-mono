@@ -1,9 +1,40 @@
-<app-nav-bar></app-nav-bar>
+<ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
+  <div class="logged-in-shell" [class.drawer-open]="drawerOpen$ | async">
+    <app-nav-bar></app-nav-bar>
 
-<main class="content">
-  <router-outlet></router-outlet>
-</main>
+    <div
+      class="drawer-scrim"
+      *ngIf="drawerOpen$ | async"
+      (click)="drawer.close()"
+    ></div>
 
-<footer class="footer">
-  QuizGenie © {{ currentYear }}
-</footer>
+    <aside class="drawer-content" *ngIf="drawerOpen$ | async">
+      <button
+        class="drawer-close-btn"
+        aria-label="Close buckets"
+        (click)="drawer.close()"
+      >×</button>
+      <app-bucket-list></app-bucket-list>
+    </aside>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="footer">
+      QuizGenie © {{ currentYear }}
+    </footer>
+  </div>
+</ng-container>
+
+<ng-template #loggedOut>
+  <div class="logged-out-shell">
+    <app-nav-bar></app-nav-bar>
+    <div class="logged-out-content">
+      <router-outlet></router-outlet>
+    </div>
+    <footer class="footer">
+      QuizGenie © {{ currentYear }}
+    </footer>
+  </div>
+</ng-template>

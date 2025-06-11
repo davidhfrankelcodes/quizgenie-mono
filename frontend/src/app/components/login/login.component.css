@@ -1,10 +1,11 @@
+/* src/app/components/login/login.component.css */
 .login-container {
-  max-width: 400px;
-  margin: 100px auto;
+  max-width: 360px;            /* same as the logged-out max */
+  margin: 0;                   /* let the parent flex center it */
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .login-container h2 {
