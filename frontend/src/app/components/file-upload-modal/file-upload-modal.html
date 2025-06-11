@@ -1,0 +1,30 @@
+<div class="modal-backdrop" (click)="closed.emit()"></div>
+<div class="modal">
+  <h2>Upload Files</h2>
+
+  <div class="dropzone"
+       (drop)="onDrop($event)"
+       (dragover)="onDragOver($event)">
+    Drag &amp; drop files here or
+    <button (click)="fileInput.click()">Browse</button>
+    <input #fileInput type="file" multiple (change)="onFileSelect($event)" hidden>
+  </div>
+
+  <ul class="file-list">
+    <li *ngFor="let f of files">
+      {{ f.name }}
+      <div class="progress-bar">
+        <div class="progress" [style.width.%]="progress[f.name]"></div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="modal-actions">
+    <button (click)="closed.emit()">Cancel</button>
+    <button [disabled]="!files.length || uploading" (click)="uploadAll()">
+      {{ uploading ? 'Uploading…' : 'Start Upload' }}
+    </button>
+  </div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>
